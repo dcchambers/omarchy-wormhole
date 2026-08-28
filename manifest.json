@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "dcchambers.omarchy-wormhole",
+  "name": "Magic Wormhole",
+  "version": "1.0.0",
+  "author": "Dakota Chambers",
+  "license": "MIT",
+  "description": "Send and receive files with magic-wormhole",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Magic Wormhole",
+    "category": "Share",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}
