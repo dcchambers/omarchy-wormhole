@@ -35,17 +35,14 @@ Panel {
   readonly property color borderColor: Color.popups.border
   readonly property color selectedBackground: Style.selectedFillFor(root.foreground, Color.accent)
   readonly property int rowHeight: Math.max(Style.space(58), Style.font.title + Style.font.body + Style.space(12))
-  readonly property int desiredWidth: root.qrEnabled
-    && (root.step === "run" || root.step === "done" || root.step === "error")
-    ? Style.space(560)
-    : Style.space(440)
+  readonly property int desiredWidth: Style.space(440)
   readonly property int desiredHeight: {
     if (root.step === "picker") return root.rowHeight * 4 + Style.space(52)
     if (root.step === "sendType") return root.rowHeight * 3 + Style.space(52)
     if (root.step === "receiveInput") return Style.space(180)
     if (root.step === "collision") return Style.space(210)
     if (root.step === "choosing") return Style.space(100)
-    if (root.qrEnabled) return Style.space(620)
+    if (root.qrEnabled) return Style.space(480)
     return Style.space(420)
   }
 
