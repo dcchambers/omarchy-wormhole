@@ -49,7 +49,8 @@ To add Wormhole under **Share** in the Omarchy menu, add this entry to
   packaged as `wormhole-files.tar.gz` before transfer.
 - **Send clipboard:** sends the current text clipboard.
 - **Receive:** enter the sender's wormhole code. Files are saved in
-  `~/Downloads`.
+  `~/Downloads`. If the destination already exists, the panel asks before
+  replacing it.
 - Click the displayed code, or press Enter, to copy a ready-to-run
   `wormhole receive <code>` command.
 - Click **Cancel** or press `X` to interrupt an active send or receive.

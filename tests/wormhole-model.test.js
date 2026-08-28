@@ -15,6 +15,7 @@ assert.deepEqual(
 assert.deepEqual(model.helperCommand("/plugin/helper.sh", "send", [], false), [])
 
 assert.deepEqual(model.parseLine("code=4-foo-bar"), { key: "code", value: "4-foo-bar" })
+assert.deepEqual(model.parseLine("collision='example.txt'"), { key: "collision", value: "'example.txt'" })
 assert.deepEqual(model.parseLine("unknown=value"), { key: "detail", value: "unknown=value" })
 assert.equal(model.tailLog("1\n2\n3", 2), "2\n3")
 

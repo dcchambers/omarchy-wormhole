@@ -26,6 +26,7 @@ Panel {
   property string resultMessage: ""
   property string errorMessage: ""
   property string logText: ""
+  property string collisionName: ""
   property bool expectedStop: false
   readonly property bool transferActive: wormholeProcess.running
 
@@ -42,6 +43,7 @@ Panel {
     if (root.step === "picker") return root.rowHeight * 4 + Style.space(52)
     if (root.step === "sendType") return root.rowHeight * 3 + Style.space(52)
     if (root.step === "receiveInput") return Style.space(180)
+    if (root.step === "collision") return Style.space(210)
     if (root.step === "choosing") return Style.space(100)
     if (root.qrEnabled) return Style.space(620)
     return Style.space(420)
@@ -91,6 +93,7 @@ Panel {
     root.resultMessage = ""
     root.errorMessage = ""
     root.logText = ""
+    root.collisionName = ""
   }
 
   function focusCurrentStep() {
@@ -111,6 +114,12 @@ Panel {
   }
 
   function activateSelected() {
+    if (root.step === "collision") {
+      if (root.selectedIndex === 0) root.cancelTransfer()
+      else root.confirmOverwrite()
+      return
+    }
+
     if (root.step === "picker") {
       var modeId = root.modeRows[root.selectedIndex].modeId
       if (modeId === "send") {
@@ -199,6 +208,7 @@ Panel {
     root.resultMessage = ""
     root.errorMessage = ""
     root.logText = ""
+    root.collisionName = ""
     root.expectedStop = false
     root.step = "run"
     wormholeProcess.command = command
@@ -226,6 +236,13 @@ Panel {
       if (record.value !== "complete" || !root.resultMessage)
         root.resultMessage = record.value
     } else if (record.key === "error") root.errorMessage = record.value
+    else if (record.key === "confirm") wormholeProcess.write("Y\n")
+    else if (record.key === "collision") {
+      root.collisionName = record.value
+      root.selectedIndex = 0
+      root.step = "collision"
+      root.focusCurrentStep()
+    }
     else root.logText = WormholeModel.appendLog(root.logText, record.value, 200)
   }
 
@@ -252,6 +269,14 @@ Panel {
     wormholeProcess.running = false
   }
 
+  function confirmOverwrite() {
+    if (!root.transferActive || root.step !== "collision") return
+    root.step = "run"
+    root.statusLine = "Replacing " + root.collisionName + "..."
+    wormholeProcess.write("Y\n")
+    root.focusCurrentStep()
+  }
+
   Process {
     id: fileChooser
     stdout: StdioCollector { id: chooserStdout; waitForEnd: true }
@@ -261,6 +286,7 @@ Panel {
 
   Process {
     id: wormholeProcess
+    stdinEnabled: true
     stdout: SplitParser {
       onRead: function(line) { root.consumeLine(line) }
     }
@@ -304,7 +330,9 @@ Panel {
       blocked: root.step === "receiveInput" && receiveInput.activeFocus
 
       onMoveRequested: function(dx, dy) {
-        if ((root.step === "picker" || root.step === "sendType") && dy !== 0)
+        if (root.step === "collision" && (dx !== 0 || dy !== 0))
+          root.selectedIndex = root.selectedIndex === 0 ? 1 : 0
+        else if ((root.step === "picker" || root.step === "sendType") && dy !== 0)
           root.select(dy)
       }
       onActivateRequested: root.activateSelected()
@@ -328,6 +356,7 @@ Panel {
             : root.step === "sendType" ? "What are you sending?"
             : root.step === "receiveInput" ? "Enter wormhole code"
             : root.step === "choosing" ? "Choose what to send"
+            : root.step === "collision" ? "File already exists"
             : root.step === "done" ? "Transfer complete"
             : root.step === "error" ? "Transfer failed"
             : root.mode === "receive" ? "Receiving" : "Sending"
@@ -500,6 +529,64 @@ Panel {
             color: root.foreground
             font.family: root.fontFamily
             font.pixelSize: Style.font.heading
+          }
+
+          Column {
+            anchors.centerIn: parent
+            width: parent.width
+            spacing: Style.space(12)
+            visible: root.step === "collision"
+
+            Text {
+              width: parent.width
+              text: root.collisionName + " already exists in ~/Downloads. Replace it?"
+              color: root.foreground
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.body
+              wrapMode: Text.WordWrap
+              horizontalAlignment: Text.AlignHCenter
+            }
+
+            Row {
+              width: parent.width
+              height: Style.space(42)
+              spacing: Style.space(8)
+
+              Repeater {
+                model: ["Cancel", "Replace"]
+
+                Rectangle {
+                  required property int index
+                  required property string modelData
+                  width: (parent.width - parent.spacing) / 2
+                  height: parent.height
+                  radius: Style.cornerRadius
+                  color: index === root.selectedIndex ? root.selectedBackground : "transparent"
+                  border.color: root.borderColor
+                  border.width: Math.max(1, Style.normalBorderWidth)
+
+                  Text {
+                    anchors.centerIn: parent
+                    text: modelData
+                    color: root.foreground
+                    font.family: root.fontFamily
+                    font.pixelSize: Style.font.body
+                    font.bold: true
+                  }
+
+                  MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onEntered: root.selectedIndex = index
+                    onClicked: {
+                      root.selectedIndex = index
+                      root.activateSelected()
+                    }
+                  }
+                }
+              }
+            }
           }
 
           Column {

@@ -10,6 +10,8 @@
 #   status=<status line>          progression lines from wormhole
 #   done=<completion line>        successful completion
 #   error=<message>               failure
+#   confirm=accept                safe receive confirmation request
+#   collision=<destination>       existing destination needs confirmation
 #   detail=<line>                 anything else worth showing in the log
 #
 # Usage:
@@ -110,7 +112,9 @@ case "$mode" in
       exit 2
     fi
     mkdir -p "$HOME/Downloads"
-    set -- wormhole receive --accept-file -o "$HOME/Downloads" "$1"
+    # Leave file acceptance interactive. The parser auto-confirms new paths,
+    # but reports collisions to QML before forwarding the user's decision.
+    set -- wormhole receive -o "$HOME/Downloads" "$1"
     ;;
   *)
     echo "error=usage: helper.sh send [--qr] <paths...> | send-clipboard [--qr] | receive <code>"
@@ -119,12 +123,25 @@ case "$mode" in
 esac
 
 parse_output() {
+  local overwrite_pending=false
   while IFS= read -r line; do
     case "$line" in
       *"Wormhole code is:"*)
         echo "code=${line#*Wormhole code is: }"
         ;;
-      *"On the other computer"* | "Sending "* | "Sending ("* | "Receiving "* | "Receiving ("*)
+      "Overwriting "*)
+        overwrite_pending=true
+        ;;
+      "Receiving file ("* | "Receiving directory ("*)
+        echo "status=$line"
+        if [[ $overwrite_pending == true ]]; then
+          echo "collision=${line#* into: }"
+        else
+          echo "confirm=accept"
+        fi
+        overwrite_pending=false
+        ;;
+      *"On the other computer"* | "Sending "* | "Sending ("* | "Receiving ("*)
         echo "status=$line"
         ;;
       *"Received file written to:"* | *"Transfer complete."* | *"Text message sent."*)
@@ -153,11 +170,15 @@ protocol_fifo="$protocol_dir/output"
 mkfifo "$protocol_fifo"
 parse_output <"$protocol_fifo" &
 parser_pid=$!
-WORMHOLE_QR="${WORMHOLE_QR:-0}" setsid stdbuf -oL -eL "$@" >"$protocol_fifo" 2>&1 &
+# Bash otherwise assigns /dev/null to an asynchronous command's stdin. Keep an
+# explicit duplicate of Quickshell's writable process pipe for receive prompts.
+exec 3<&0
+WORMHOLE_QR="${WORMHOLE_QR:-0}" setsid stdbuf -oL -eL "$@" <&3 >"$protocol_fifo" 2>&1 &
 command_pid=$!
 
 wait "$command_pid"
 rc=$?
+exec 3<&-
 wait "$parser_pid" 2>/dev/null || true
 if ((rc != 0)); then
   echo "error=wormhole exited with status $rc"

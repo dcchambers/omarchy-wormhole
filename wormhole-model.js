@@ -50,7 +50,7 @@ function parseLine(line) {
   var eq = text.indexOf("=")
   if (eq <= 0) return { key: "detail", value: text }
   var key = text.slice(0, eq)
-  if (["code", "status", "done", "error", "detail"].indexOf(key) === -1) {
+  if (["code", "status", "done", "error", "confirm", "collision", "detail"].indexOf(key) === -1) {
     return { key: "detail", value: text }
   }
   return { key: key, value: text.slice(eq + 1) }
