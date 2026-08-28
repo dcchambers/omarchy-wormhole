@@ -60,15 +60,15 @@ To add Wormhole under **Share** in the Omarchy menu, add this entry to
 
 ## Additional Screenshots
 
-### Send
+Send
 
 ![](.github/assets/screenshot-2.png)
 
-### Receive
+Receive
 
 ![](.github/assets/screenshot-3.png)
 
-### Share Menu
+Share Menu
 
 ![](.github/assets/screenshot-4.png)
 
