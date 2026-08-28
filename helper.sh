@@ -47,7 +47,7 @@ cancel() {
 trap cancel TERM INT
 
 if ! command -v wormhole >/dev/null 2>&1; then
-  echo "error=magic-wormhole is not installed. Run: omarchy pkg add magic-wormhole wl-clipboard"
+  echo "error=magic-wormhole is not installed. Run: omarchy pkg add magic-wormhole"
   exit 127
 fi
 
@@ -97,7 +97,7 @@ case "$mode" in
     ;;
   send-clipboard)
     if ! command -v wl-paste >/dev/null 2>&1; then
-      echo "error=wl-clipboard is not installed. Run: omarchy pkg add magic-wormhole wl-clipboard"
+      echo "error=wl-clipboard is not installed. Run: omarchy pkg add wl-clipboard"
       exit 127
     fi
     if [[ ${1:-} == "--qr" ]]; then
