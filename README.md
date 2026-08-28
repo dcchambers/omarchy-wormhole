@@ -3,6 +3,9 @@
 A native Omarchy bar dropdown for sending files, folders, and
 clipboard text with [magic-wormhole](https://magic-wormhole.readthedocs.io/).
 
+![](.github/assets/screenshot-1.png)
+
+
 ## Requirements
 
 - Omarchy 4 (Quattro shell)
@@ -55,6 +58,12 @@ To add Wormhole under **Share** in the Omarchy menu, add this entry to
   `wormhole receive <code>` command.
 - Click **Cancel** or press `X` to interrupt an active send or receive.
 - Escape hides the dropdown without interrupting an active transfer.
+
+## Screenshots
+
+![](.github/assets/screenshot-1.png)
+![](.github/assets/screenshot-2.png)
+![](.github/assets/screenshot-3.png)
 
 ## Remove
 
