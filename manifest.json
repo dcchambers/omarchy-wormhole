@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "dcchambers.omarchy-wormhole",
   "name": "Magic Wormhole",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Dakota Chambers",
   "license": "MIT",
   "description": "Send and receive files with magic-wormhole",
